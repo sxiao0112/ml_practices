@@ -10,24 +10,25 @@ Read the relevant file BEFORE starting that type of work:
 | Running or planning ML experiments | experiment-practices.md      |
 | Designing a new pipeline or method | pipeline-architecture.md     |
 
-# Committing
-Before committing any code change, run the `test-and-fix` agent first. Only commit once tests pass.
-- New feature or breaking change: instruct the agent to write new tests, then run until passing
-- Refactor or simple fix: instruct the agent to just run existing tests and fix any failures
+# Testing & Committing
 
-Use the `commit-push` agent (Agent tool with subagent_type omitted, or the agent file) for all commits and pushes. Proactively invoke it — without waiting for the user to ask — whenever:
+Two Haiku agents, always called in this order:
+
+**Step 1 — `test-and-fix`** (skip for non-code changes like docs/config)
+
+The outer model must provide detailed instructions before invoking:
+- **New feature or breaking change**: which functions/endpoints to test, expected inputs/outputs with concrete examples, edge cases, and the test command
+- **Refactor or simple fix**: just the test command to run existing tests
+
+The agent writes tests (if needed), runs them, fixes failures, and repeats until all pass.
+
+**Step 2 — `commit-push`**
+
+Stages, commits with a descriptive message, and pushes. Only call after step 1 passes (or is skipped).
+
+**When to trigger** — proactively, without waiting for the user:
 - A feature or task is complete
 - Git diff shows 200+ lines changed
 - The user says "done", "ship it", "that's it", or similar
 
-Never commit manually with the Bash tool when this agent is available.
-
-# Testing
-Use the `test-and-fix` agent (Agent tool with subagent_type omitted) when writing and running tests.
-Before invoking, provide detailed instructions covering:
-- Exactly which functions/endpoints/behaviors to test
-- Expected inputs and outputs (with concrete examples where possible)
-- Edge cases to cover
-- How to run the tests (command, working directory, env vars if needed)
-
-The agent will write the tests, run them, and iterate until they pass.
+Never commit manually with the Bash tool when these agents are available.
