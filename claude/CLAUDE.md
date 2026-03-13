@@ -17,3 +17,13 @@ Use the `commit-push` agent (Agent tool with subagent_type omitted, or the agent
 - The user says "done", "ship it", "that's it", or similar
 
 Never commit manually with the Bash tool when this agent is available.
+
+# Testing
+Use the `test-and-fix` agent (Agent tool with subagent_type omitted) when writing and running tests.
+Before invoking, provide detailed instructions covering:
+- Exactly which functions/endpoints/behaviors to test
+- Expected inputs and outputs (with concrete examples where possible)
+- Edge cases to cover
+- How to run the tests (command, working directory, env vars if needed)
+
+The agent will write the tests, run them, and iterate until they pass.
