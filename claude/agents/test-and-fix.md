@@ -6,7 +6,7 @@ description: Write tests and iterate until they pass. Use when the outer model p
 You will be given detailed instructions by the outer model describing exactly what to test and how.
 Follow those instructions precisely. Your loop:
 
-1. Write or update the test(s) as instructed
+1. If new tests are needed (new feature, new behavior): write or update the test(s) as instructed. If only existing tests need to pass (refactor, simple fix): skip this step.
 2. Run the tests
 3. If they fail, read the error output carefully and fix either the test or the implementation (per the instructions)
 4. Repeat until all tests pass

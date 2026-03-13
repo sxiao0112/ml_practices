@@ -12,6 +12,8 @@ Read the relevant file BEFORE starting that type of work:
 
 # Committing
 Before committing any code change, run the `test-and-fix` agent first. Only commit once tests pass.
+- New feature or breaking change: instruct the agent to write new tests, then run until passing
+- Refactor or simple fix: instruct the agent to just run existing tests and fix any failures
 
 Use the `commit-push` agent (Agent tool with subagent_type omitted, or the agent file) for all commits and pushes. Proactively invoke it — without waiting for the user to ask — whenever:
 - A feature or task is complete
