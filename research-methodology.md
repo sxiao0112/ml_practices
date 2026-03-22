@@ -67,18 +67,35 @@ A reusable YAML schema and agent instructions for this are in
 ## 3. External Adversarial Review
 
 Before committing to a research direction, send your analysis to a different
-model/perspective for critique. The prompt should explicitly ask:
+model/perspective for critique. Use Codex MCP with GPT-5.4:
 
-- "Where am I overconfident given the evidence?"
-- "What logical errors or missed connections?"
-- "Is this experiment design confounded?"
-- "Does the experiment actually test the stated hypothesis?"
+```
+mcp__codex__codex with model="gpt-5.4"
+```
 
-Key lesson: distinguish **sufficiency** from **mediation**. Showing that X
-produces Y (sufficiency) is NOT the same as showing that interventions cause
-Y *through* X (mediation). Mediation requires blocking X and showing Y
-disappears while the intervention's intended effect remains. This distinction
-is easy to miss when designing experiments.
+### What to include in the prompt
+- Full context from the lit review (key findings with arXiv IDs and evidential status)
+- The specific proposal/analysis being critiqued
+- Self-identified weaknesses (shows good faith, gets more targeted critique)
+- Explicit questions that invite pushback
+
+### Prompt patterns that work
+- "Does experiment X actually provide evidence for hypothesis Y, or is it confounded by Z?"
+- "Is my hierarchy ordering defensible? Which levels am I overconfident about?"
+- "What experimental controls would make this decisive vs hand-wavy?"
+- "What alternative directions would YOU suggest given this landscape?"
+
+### Key lesson: sufficiency ≠ mediation
+Showing that X produces Y (sufficiency) is NOT the same as showing that
+interventions cause Y *through* X (mediation). Mediation requires:
+1. Show T increases M (intervention activates candidate mediator)
+2. Block M during T, show harmful effect disappears (necessity)
+3. Show intended effect of T survives blocking M (specificity)
+4. Apply M alone, show it partially recapitulates the harm (sufficiency)
+5. Repeat across intervention types (generality)
+
+This distinction is the #1 thing external critique catches that self-review
+misses.
 
 ## 4. Evidential Hierarchy
 
@@ -121,7 +138,45 @@ The most productive contradictions are ones where two papers make the SAME
 measurement but get different results — these reveal hidden confounds or
 boundary conditions.
 
-## 6. Separate Description from Explanation
+## 6. Cross-Literature Analysis Structure
+
+When synthesizing across a large body of papers, use focused disputes rather
+than grand narratives:
+
+### Identify specific disputes
+Find points where the literature actually disagrees. For each dispute:
+- What's established (not in dispute)
+- Competing explanations with best evidence for each
+- What evidence would resolve it
+- Current assessment
+
+Grand "worldviews" (e.g., "it's all superposition" vs "it's all optimization")
+create strawmen. Specific disputes (e.g., "is norm growth cause or symptom of
+editing failure?") produce testable predictions.
+
+### Build explanatory hierarchy
+Classify findings by depth, but constrain by evidential strength:
+- A weakly-evidenced finding should NOT anchor the hierarchy just because it
+  sounds fundamental
+- Each level should predict: "if this is the bottleneck, then intervention X
+  should help and Y should not"
+- Without falsifiable predictions, the hierarchy is taxonomy, not theory
+
+### Check "unifications" rigorously
+"Three views of one object" claims (e.g., weight-space subspace = activation-space
+direction = loss-landscape attractor) require cross-space intervention transfer
+to confirm. Co-occurrence is suggestive, not conclusive.
+
+### Map contradictions carefully
+Most apparent contradictions are scope/metric/level mismatches:
+- Scope: Paper A tested layer 24, Paper B tested all layers
+- Metric: Paper A measured direct recall, Paper B measured downstream consequences
+- Level: Paper A analyzed weights, Paper B analyzed activations
+
+Only flag as genuine when two papers measure the same thing at the same level
+and disagree.
+
+## 7. Separate Description from Explanation
 
 When reviewing a field, keep three levels distinct:
 
