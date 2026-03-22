@@ -1,4 +1,4 @@
-# Methods Card Extraction Agent — Instructions
+# Paper Card Extraction Agent — Instructions
 
 ## Task
 Extract structured technical/methodological details from a single academic paper into the YAML schema defined in SCHEMA.yaml.
@@ -14,13 +14,13 @@ Extract structured technical/methodological details from a single academic paper
    - Include: abstract, all sections, key tables/figures described in text, appendix content
    - Purpose: avoid re-fetching the paper later
 
-2. **Methods card** → `{CARDS_DIR}/{ARXIV_ID}.yaml`
+2. **Paper card** → `{CARDS_DIR}/{ARXIV_ID}.yaml`
    - Follow SCHEMA.yaml exactly
    - Every field filled or marked "not_reported"
 
 ## Base paths (set these per-project when launching the agent)
 - Papers: `{PAPERS_DIR}`
-- Methods cards: `{CARDS_DIR}`
+- Paper cards: `{CARDS_DIR}`
 
 ## Extraction Protocol
 
@@ -49,7 +49,7 @@ Write everything you extracted to `{PAPERS_DIR}/{ARXIV_ID}.md`. Include:
 - Appendix content (often contains crucial hyperparameters and dataset details)
 - Any URLs referenced (GitHub, HuggingFace, etc.)
 
-### Step 4: Fill the methods card
+### Step 4: Fill the paper card
 Read SCHEMA.yaml for the exact field definitions. Key rules:
 
 **Precision rules:**
@@ -132,7 +132,7 @@ Before saving, verify:
 To launch an extraction agent, compose a prompt like:
 
 ```
-You are a methods card extraction agent.
+You are a paper card extraction agent.
 
 ## Step 0: Read your instructions and schema
 1. Read: {CARDS_DIR}/AGENT_INSTRUCTIONS.md

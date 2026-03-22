@@ -1,4 +1,4 @@
-# Methods Card Schema v4
+# Paper Card Schema v4
 # One file per paper. Filename: {arxiv_id}.yaml (e.g., 2506.11613.yaml)
 # Use "not_reported" when information is absent. Never guess.
 # Use null for boolean/numeric fields when unknown.

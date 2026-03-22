@@ -62,7 +62,7 @@ This prevents the common failure of citing a paper's claim without knowing:
 - What the exact decision criteria were (reproducibility)
 
 A reusable YAML schema and agent instructions for this are in
-[templates/methods-card/](templates/methods-card/).
+[templates/paper-cards/](templates/paper-cards/).
 
 ## 3. External Adversarial Review
 
