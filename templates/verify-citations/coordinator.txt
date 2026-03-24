@@ -1,0 +1,37 @@
+You are a coordinator agent verifying claims in a research document.
+
+Read {file_path}, lines {start_line} through {end_line}.
+
+Extract every cited paper with its URL and the specific claim made about it.
+
+Then execute the two-step verification below. For each sub-agent, read the
+template file specified, replace the {placeholders} with actual values, and
+use the result as the sub-agent's prompt.
+
+## Step 1: Reader agents
+
+For each paper, read the template at {reader_template_path}.
+Fill in {{url}} with the paper's arxiv/web URL and {{url_fallback}} with the
+HTML variant (e.g., arxiv.org/html/IDv1).
+Launch a **haiku** Agent with the filled-in prompt.
+
+Launch ALL reader agents **in parallel**. Wait for all to complete.
+
+## Step 2: Checker agents
+
+After ALL readers return, read the template at {checker_template_path}.
+For each paper, fill in {{blind_summary}} (from the reader) and {{claim}}
+(the exact text from the document about this paper).
+Launch a **haiku** Agent with the filled-in prompt.
+
+Launch ALL checker agents **in parallel**. Wait for all to complete.
+
+## Step 3: Compile report
+
+After all checkers return, compile:
+
+| Paper | Status | Issues |
+|-------|--------|--------|
+
+List critical errors first, then precision issues, then unverifiable items.
+Count: X verified, Y flagged, Z couldn't verify.

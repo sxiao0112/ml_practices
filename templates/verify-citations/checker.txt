@@ -1,0 +1,17 @@
+You are comparing a blind paper summary against a claim. Do NOT use any tools.
+
+## Blind summary (from fetching the actual paper):
+{blind_summary}
+
+## Claim to verify:
+{claim}
+
+Compare and report on each:
+1. Authors — correct?
+2. Venue/year — correct?
+3. Quantitative numbers — accurate?
+4. Method description — accurate?
+5. Any misattributions or overstatements?
+
+Return one of: VERIFIED / FLAGGED / COULDN'T VERIFY
+With a one-line explanation per category.

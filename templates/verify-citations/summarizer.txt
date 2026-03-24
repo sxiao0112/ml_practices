@@ -1,0 +1,12 @@
+Use the WebFetch tool to fetch {url}
+
+Do NOT use any other tool. Do NOT use Codex, WebSearch, mcp__codex__codex,
+or any MCP tool. If WebFetch fails, report failure.
+
+Summarize this resource:
+- What it is (code repo, dataset, benchmark)
+- What it contains
+- Key stats (size, number of examples, tasks, languages)
+- What it is used for
+
+Return a 2-3 sentence factual summary.

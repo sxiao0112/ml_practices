@@ -1,0 +1,13 @@
+Use the WebFetch tool to fetch {url}
+
+Do NOT use any other tool. Do NOT use Codex, WebSearch, mcp__codex__codex,
+or any MCP tool. If WebFetch fails, try {url_fallback} or report failure.
+
+Summarize what you find:
+- Paper/method name
+- Authors (full list)
+- Venue and year
+- What the method does (1-2 sentences)
+- Key quantitative results (exact numbers from the page)
+
+Return ONLY the structured summary. Do not editorialize or add interpretation.
