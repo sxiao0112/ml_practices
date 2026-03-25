@@ -6,52 +6,20 @@ description: Verify claims and citations in a research document using blind two-
 Hierarchical citation verification. You are the **top-level orchestrator** — you
 do NOT read the document yourself. You delegate everything to sub-agents.
 
-## Before starting: block Codex MCP
+## Named sub-agents (tool-restricted)
 
-Sub-agents will call Codex MCP if available, wasting credits and bypassing
-the blind-fetch design. Block it for the duration of this workflow:
+These agents have explicit tool allowlists — no MCP tools (Codex etc.):
 
-```bash
-# Add deny rule (creates file if needed, merges if exists)
-python3 -c "
-import json, os
-path = os.path.expanduser('.claude/settings.json')
-os.makedirs(os.path.dirname(path), exist_ok=True)
-try:
-    cfg = json.load(open(path))
-except (FileNotFoundError, json.JSONDecodeError):
-    cfg = {}
-deny = cfg.setdefault('permissions', {}).setdefault('deny', [])
-if 'mcp__codex__*' not in deny:
-    deny.append('mcp__codex__*')
-    json.dump(cfg, open(path, 'w'), indent=2)
-    print('Codex blocked')
-else:
-    print('Codex already blocked')
-"
-```
+| Agent name | Model | Tools | Purpose |
+|-----------|-------|-------|---------|
+| `citation-coordinator` | haiku | Read, Bash, Agent | Coordinate one section: extract citations, launch readers + checkers |
+| `citation-reader` | haiku | Read, WebFetch, Bash | Blind-fetch one URL, summarize |
+| `citation-checker` | haiku | Read | Compare blind summary vs claim |
+| `citation-venue-checker` | haiku | Read, WebFetch, WebSearch, Bash | Verify venue/year via web search |
+| `citation-summarizer` | haiku | Read, WebFetch, Bash | Fetch and summarize one repo/dataset |
 
-**After the workflow completes (always, even on failure)**, remove the deny rule:
-
-```bash
-python3 -c "
-import json, os
-path = os.path.expanduser('.claude/settings.json')
-try:
-    cfg = json.load(open(path))
-    deny = cfg.get('permissions', {}).get('deny', [])
-    if 'mcp__codex__*' in deny:
-        deny.remove('mcp__codex__*')
-        if not deny:
-            del cfg['permissions']['deny']
-        if not cfg['permissions']:
-            del cfg['permissions']
-        json.dump(cfg, open(path, 'w'), indent=2)
-        print('Codex unblocked')
-except Exception as e:
-    print(f'Warning: could not unblock Codex: {e}')
-"
-```
+The coordinator has NO web access — it can only Read, Bash, and launch Agents.
+This forces it to delegate fetching to citation-reader agents.
 
 ## Templates
 
@@ -59,11 +27,11 @@ Prompt templates in `~/Mao/claude-toolkit/templates/verify-citations/`:
 
 | File | Filled by | Passed to | Placeholders |
 |------|----------|-----------|-------------|
-| `coordinator.txt` | Orchestrator (you) | haiku coordinator | `{file_path}`, `{start_line}`, `{end_line}`, `{reader_template_path}`, `{checker_template_path}` |
-| `reader.txt` | Coordinator | haiku reader | `{url}`, `{url_fallback}` |
-| `checker.txt` | Coordinator | haiku checker | `{blind_summary}`, `{claim}` |
-| `summarizer.txt` | Coordinator | haiku summarizer | `{url}` |
-| `formatter.txt` | Coordinator | haiku formatter | `{raw_summary}` |
+| `coordinator.txt` | Orchestrator (you) | haiku coordinator Agent | `{file_path}`, `{start_line}`, `{end_line}`, `{reader_template_path}`, `{checker_template_path}` |
+| `reader.txt` | Coordinator | `citation-reader` agent | `{url}`, `{url_fallback}` |
+| `checker.txt` | Coordinator | `citation-checker` agent | `{blind_summary}`, `{claim}` |
+| `summarizer.txt` | Coordinator | `citation-summarizer` agent | `{url}` |
+| `formatter.txt` | Coordinator | `citation-checker` agent (reused) | `{raw_summary}` |
 
 **Context optimization**: No agent loads another agent's template. Every level
 uses Bash/Python to read the template, fill placeholders, and pass the result
@@ -71,12 +39,10 @@ as the sub-agent prompt.
 
 ## Workflow
 
-1. Block Codex (see above).
+1. Launch a **haiku splitter agent** that reads the target document, identifies
+   sections containing citations, and returns a list of `(section_name, start_line, end_line)`.
 
-2. Launch a **haiku splitter agent** that reads the target document, identifies
-   sections containing citations, and returns `(section_name, start_line, end_line)`.
-
-3. For each section, use Bash to read `coordinator.txt` and fill placeholders:
+2. For each section, use Bash to read `coordinator.txt` and fill placeholders:
    ```
    python3 -c "
    t = open('coordinator.txt').read()
@@ -84,17 +50,15 @@ as the sub-agent prompt.
                   reader_template_path=..., checker_template_path=...))
    "
    ```
-   Launch a **haiku** Agent with the output. Run all in parallel.
+   Launch a **citation-coordinator** Agent (by name) with the output. Run all in parallel.
 
-4. Each coordinator:
+3. Each coordinator:
    - Reads its document section and extracts papers + claims
-   - Uses Bash/Python to fill `reader.txt` → launches haiku readers (parallel)
-   - Waits for readers, fills `checker.txt` → launches haiku checkers (parallel)
+   - Uses Bash/Python to fill `reader.txt` → launches `citation-reader` agents (parallel)
+   - Waits for readers, fills `checker.txt` → launches `citation-checker` agents (parallel)
    - Returns ONLY flagged items + verified count
 
-5. Collect coordinator reports and present consolidated summary.
-
-6. Unblock Codex (see above). **Always run this step.**
+4. Collect coordinator reports and present consolidated summary.
 
 ## Incremental mode
 
@@ -104,18 +68,14 @@ For re-checking after fixes, pass a paper list to the coordinator:
 ## Venue verification follow-up
 
 For papers where venue couldn't be confirmed from arxiv abstracts, launch
-haiku agents with WebSearch to confirm venues.
+`citation-venue-checker` agents with WebSearch access.
 
 ## For repo/dataset summarization
 
-Same pattern with `summarizer.txt` → `formatter.txt`.
+Same pattern with `citation-summarizer` agents and `summarizer.txt` → `formatter.txt`.
 
-## Architecture notes
+## Known issues
 
-- Custom agent definitions (`.claude/agents/*.md`) with `tools` restrictions
-  CANNOT be invoked as sub-agents — `subagent_type` only accepts built-in types
-  (general-purpose, Explore, Plan, claude-code-guide, statusline-setup).
-- The only reliable way to block specific tools for sub-agents is the
-  session-level deny rule in `.claude/settings.json`.
-- Sonnet coordinators follow "don't use Codex" prompts (0 calls in testing).
-  Haiku coordinators and sub-agents ignore it. The deny rule handles this.
+- Tool restrictions via `tools` field may not enforce in `bypassPermissions` mode.
+- arxiv abstract pages often lack venue info — use venue-checker follow-up.
+- Full paper text at `arxiv.org/html/{id}v1` — use as `{url_fallback}`.
