@@ -4,34 +4,46 @@ Read {file_path}, lines {start_line} through {end_line}.
 
 Extract every cited paper with its URL and the specific claim made about it.
 
-Then execute the two-step verification below. For each sub-agent, read the
-template file specified, replace the {placeholders} with actual values, and
-use the result as the sub-agent's prompt.
+Then execute the two-step verification below.
 
 ## Step 1: Reader agents
 
-For each paper, read the template at {reader_template_path}.
-Fill in {{url}} with the paper's arxiv/web URL and {{url_fallback}} with the
-HTML variant (e.g., arxiv.org/html/IDv1).
-Launch a **haiku** Agent with the filled-in prompt.
+For each paper, use Bash to run Python that reads the template file and fills
+in the placeholders:
 
+```
+python3 -c "
+t = open('{reader_template_path}').read()
+print(t.format(url='THE_PAPER_URL', url_fallback='THE_FALLBACK_URL'))
+"
+```
+
+Use the printed output as the prompt for a **haiku** Agent.
 Launch ALL reader agents **in parallel**. Wait for all to complete.
 
 ## Step 2: Checker agents
 
-After ALL readers return, read the template at {checker_template_path}.
-For each paper, fill in {{blind_summary}} (from the reader) and {{claim}}
-(the exact text from the document about this paper).
-Launch a **haiku** Agent with the filled-in prompt.
+After ALL readers return, for each paper use Bash to run Python that reads
+the checker template and fills in the blind summary and claim:
 
+```
+python3 -c "
+t = open('{checker_template_path}').read()
+print(t.format(blind_summary='''PASTE_BLIND_SUMMARY''', claim='''PASTE_CLAIM'''))
+"
+```
+
+Use the printed output as the prompt for a **haiku** Agent.
 Launch ALL checker agents **in parallel**. Wait for all to complete.
 
 ## Step 3: Compile report
 
-After all checkers return, compile:
+Return ONLY flagged and couldn't-verify items with details.
+For verified items, return only the count: "X/Y verified, no issues."
 
-| Paper | Status | Issues |
-|-------|--------|--------|
+For each flagged item, return structured output:
+```
+FLAGGED | old_text: "exact text in document" | correction: "what it should say" | reason: why
+```
 
-List critical errors first, then precision issues, then unverifiable items.
-Count: X verified, Y flagged, Z couldn't verify.
+This format allows automated patching by the orchestrator.

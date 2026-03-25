@@ -18,26 +18,42 @@ All prompt templates are in `~/Mao/claude-toolkit/templates/verify-citations/`:
 | `summarizer.txt` | haiku | Fetch and summarize one repo/dataset | `{url}` |
 | `formatter.txt` | haiku | Condense raw summary to 1-2 sentences | `{raw_summary}` |
 
+**Context optimization**: No agent loads another agent's template into its
+conversation context. Every level uses Bash/Python to read the template file,
+fill placeholders, and capture the output — then passes that as the sub-agent
+prompt via a tool call.
+
 ## Workflow
 
-1. Launch a **sonnet splitter agent** that reads the target document, identifies
+1. Launch a **haiku splitter agent** that reads the target document, identifies
    sections containing citations, and returns a list of `(section_name, start_line, end_line)`.
    This keeps the document content out of your context.
 
-2. For each section, read `coordinator.txt`, fill in the placeholders, and launch
-   a **sonnet coordinator** Agent with the filled prompt. Run all in parallel as
-   background agents.
+2. For each section, use Bash to read `coordinator.txt` and fill placeholders:
+   ```
+   python3 -c "
+   t = open('coordinator.txt').read()
+   print(t.format(file_path=..., start_line=..., end_line=...,
+                  reader_template_path=..., checker_template_path=...))
+   "
+   ```
+   Launch a **sonnet coordinator** Agent with the output. Run all in parallel.
 
 3. Each coordinator:
-   - Reads its section and extracts papers + claims
-   - Reads `reader.txt`, fills in `{url}` per paper, launches haiku readers (parallel)
-   - Waits for readers, then reads `checker.txt`, fills in `{blind_summary}` + `{claim}`, launches haiku checkers (parallel)
-   - Compiles section report
+   - Reads its document section and extracts papers + claims
+   - Uses Bash/Python to fill `reader.txt` per paper → launches haiku readers (parallel)
+   - Waits for readers, uses Bash/Python to fill `checker.txt` per paper → launches haiku checkers (parallel)
+   - Returns ONLY flagged items + verified count (not full table)
 
-4. Collect all coordinator reports and present consolidated summary:
-   - Critical errors (wrong URLs, wrong authors, wrong numbers)
+4. Collect coordinator reports and present consolidated summary:
+   - Critical errors with structured `old_text → correction` for automated patching
    - Precision issues (overstatements, imprecise descriptions)
-   - Unverifiable from abstracts (flag for manual check or web search)
+   - Unverifiable from abstracts (flag for web search follow-up)
+
+## Incremental mode
+
+For re-checking after fixes, pass a paper list to the coordinator:
+> Only check these specific papers: {paper_list}. Skip all others.
 
 ## For repo/dataset summarization
 
