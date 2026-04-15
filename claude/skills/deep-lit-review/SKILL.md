@@ -1,7 +1,7 @@
 ---
 name: deep-lit-review
 description: Orchestrated multi-agent deep literature review with iterative follow-up, citation graph traversal, and convergence-based stopping. Use when user says "deep lit review", "review the literature", "find all papers on X", "lit review agents", or needs comprehensive literature exploration beyond simple search.
-argument-hint: [topic-or-list-of-questions] — output: [path] — max-rounds: [N]
+argument-hint: "[topic-or-list-of-questions] — output: [path] — max-rounds: [N] — webpage"
 allowed-tools: Agent, Read, Write, Glob, Grep, Bash(*), WebSearch, WebFetch
 ---
 
@@ -14,7 +14,8 @@ Parse `$ARGUMENTS` for:
 - `— output: [path]`: Where to save results (default: `docs/lit_review/{date}-deep-review/`)
 - `— max-rounds: [N]`: Maximum follow-up iterations (default: 10)
 - `— agents: [N]`: Number of initial parallel agents (default: 7)
-- `— model: [sonnet|haiku|opus]`: Model for search agents (default: haiku)
+- `— model: [sonnet|haiku|opus]`: Model for search agents and the in-page AI chat box (default: haiku)
+- `— webpage`: If present, generate an interactive HTML viewer after synthesis (see Webpage Generation)
 
 ## File Structure
 
@@ -39,7 +40,9 @@ The skill creates two separate areas — agent-facing working files and human-fa
 │   └── open_questions.md               # What we still don't know
 │
 ├── state.md                            # Live status dashboard
-└── README.md                           # Overview for the human
+├── README.md                           # Overview for the human
+├── index.html                          # Interactive viewer (only if --webpage)
+└── server.py                           # Local server + AI chat proxy (only if --webpage)
 ```
 
 ## Orchestration Loop
@@ -82,6 +85,12 @@ WHILE round < max_rounds AND NOT converged:
 AFTER loop exits:
     Launch SYNTHESIS AGENT (reads all workbench files, writes reports/)
     Update README.md with final status
+
+    IF --webpage was passed:
+        Launch WEBPAGE AGENT (see templates/webpage_agent.md)
+        The agent discovers all markdown files, fills in the HTML + server.py templates,
+        and writes index.html + server.py to {output_dir}/
+        Print to user: "Run: python {output_dir}/server.py  →  open http://localhost:8765"
 ```
 
 ## Convergence Criteria
