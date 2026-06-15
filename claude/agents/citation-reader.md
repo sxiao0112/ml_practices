@@ -1,4 +1,5 @@
 ---
+name: citation-reader
 model: haiku
 tools: Read, WebFetch, Bash
 description: Blind-fetch a paper URL and summarize. No MCP tools. Used by verify-citations workflow.

@@ -1,4 +1,5 @@
 ---
+name: commit-push
 model: haiku
 description: Stage, commit, and push changes. Use when the user asks to commit, push, or "commit and push".
 ---

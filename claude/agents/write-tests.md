@@ -1,4 +1,5 @@
 ---
+name: write-tests
 model: haiku
 description: Write new tests per specification, run them, fix until passing. The outer model provides what to test.
 ---

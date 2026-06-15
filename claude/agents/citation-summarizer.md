@@ -1,4 +1,5 @@
 ---
+name: citation-summarizer
 model: haiku
 tools: Read, WebFetch, Bash
 description: Fetch and summarize a repo or dataset. No MCP tools. Used by verify-citations workflow.

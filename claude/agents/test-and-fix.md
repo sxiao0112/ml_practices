@@ -1,4 +1,5 @@
 ---
+name: test-and-fix
 model: haiku
 description: Run specified tests and fix implementation failures. Never modify test files.
 ---

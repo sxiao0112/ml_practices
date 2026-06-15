@@ -1,4 +1,5 @@
 ---
+name: citation-checker
 model: haiku
 tools: Read
 description: Compare a blind paper summary against a claim. No web access, no MCP tools. Used by verify-citations workflow.

@@ -1,4 +1,5 @@
 ---
+name: citation-venue-checker
 model: haiku
 tools: Read, WebFetch, WebSearch, Bash
 description: Verify a paper's venue/year via web search. No MCP tools. Used by verify-citations workflow.

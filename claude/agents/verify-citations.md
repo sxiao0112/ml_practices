@@ -1,4 +1,5 @@
 ---
+name: verify-citations
 model: haiku
 description: Verify claims and citations in a research document using blind two-step checking. Use when the user wants to fact-check a synthesis doc, lit review, or any document with paper citations.
 ---
