@@ -1,0 +1,5 @@
+# Ignore everything under docs/ except the 2026-04-15 swarm-intelligence review
+/docs/*
+!/docs/lit_review/
+/docs/lit_review/*
+!/docs/lit_review/2026-04-15-swarm-intelligence-review/
