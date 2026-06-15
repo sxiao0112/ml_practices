@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd ~/Mao/claude-toolkit && git pull --quiet 2>/dev/null || true"
+            "command": "cd ~/ml-best-practices && git pull origin main --quiet 2>/dev/null || true"
           }
         ]
       }

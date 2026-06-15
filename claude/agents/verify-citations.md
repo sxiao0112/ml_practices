@@ -23,7 +23,7 @@ Other skills and other projects are unaffected.
 
 ## Templates
 
-Prompt templates in `~/Mao/claude-toolkit/templates/verify-citations/`:
+Prompt templates in `~/ml-best-practices/templates/verify-citations/`:
 
 | File | Filled by | Passed to | Placeholders |
 |------|----------|-----------|-------------|

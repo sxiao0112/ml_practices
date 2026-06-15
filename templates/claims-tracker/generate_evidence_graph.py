@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate evidence graph from claims files.
 
-Template from claude-toolkit/templates/claims-tracker/
+Template from ml_practices/templates/claims-tracker/
 Customize the CONFIG dict below for your project.
 
 Reads all claims/*.yaml, extracts supports/depends_on/replicated_by edges,

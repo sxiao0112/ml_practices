@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate a human-readable claim index from claims files.
 
-Template from claude-toolkit/templates/claims-tracker/
+Template from ml_practices/templates/claims-tracker/
 Customize the CONFIG dict below for your project.
 
 Reads all claims/*.yaml and outputs claims/claim_index.md -- a summary table

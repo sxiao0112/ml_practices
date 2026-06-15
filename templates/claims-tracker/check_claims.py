@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Claims validation and staleness detection.
 
-Template from claude-toolkit/templates/claims-tracker/
+Template from ml_practices/templates/claims-tracker/
 Customize the CONFIG dict below for your project.
 
 Validates claim YAML files against the manuscript and provenance system.

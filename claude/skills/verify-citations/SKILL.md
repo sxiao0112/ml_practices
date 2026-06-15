@@ -12,7 +12,7 @@ reader agents fetch papers without seeing claims, checker agents compare summari
 
 ## Constants
 
-- TEMPLATE_DIR = `~/Mao/claude-toolkit/templates/verify-citations`
+- TEMPLATE_DIR = `~/ml-best-practices/templates/verify-citations`
 - READER_MODEL = `haiku`
 - CHECKER_MODEL = `haiku`
 - QUOTE_VERIFIER_MODEL = `sonnet` (for direct quotes only)
