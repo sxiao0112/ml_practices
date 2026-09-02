@@ -31,6 +31,15 @@
             "command": "if [ -f /tmp/.block_codex ] && [ $(( $(date +%s) - $(stat -c %Y /tmp/.block_codex 2>/dev/null || echo 0) )) -lt 3600 ]; then echo 'Codex blocked (auto-expires 1h) — rm /tmp/.block_codex to re-enable' >&2; exit 2; fi"
           }
         ]
+      },
+      {
+        "matcher": "Read|Edit|Write|NotebookEdit|Grep|Glob|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/block-credentials.py"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -59,7 +68,8 @@
     "command": "input=$(cat); model=$(echo \"$input\" | jq -r '.model.display_name'); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); used_pct=$(echo \"$input\" | jq -r '.context_window.used_percentage // empty'); git_branch=\"\"; if git -C \"$cwd\" rev-parse --git-dir >/dev/null 2>&1; then branch=$(git -C \"$cwd\" --no-optional-locks branch --show-current 2>/dev/null); [ -n \"$branch\" ] && git_branch=\" $(printf '\\033[32m')($branch)$(printf '\\033[0m')\"; fi; dir_name=$(basename \"$cwd\"); printf '\\033[36m%s\\033[0m in \\033[34m%s\\033[0m%s' \"$model\" \"$dir_name\" \"$git_branch\"; [ -n \"$used_pct\" ] && printf ' \\033[33m[ctx: %.0f%%]\\033[0m' \"$used_pct\"; echo"
   },
   "effortLevel": "medium",
-  "voiceEnabled": true,
   "skipDangerousModePermissionPrompt": true,
-  "theme": "dark"
+  "theme": "dark",
+  "voiceEnabled": true,
+  "tui": "fullscreen"
 }

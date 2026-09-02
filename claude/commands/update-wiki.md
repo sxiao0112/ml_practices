@@ -1,0 +1,1 @@
+/Users/profxiao/Research-Agents/lit_wiki_archive/ai-risk-wiki/.claude/commands/update-wiki.md
