@@ -5,7 +5,7 @@
 #   bash ~/ml-best-practices/install.sh
 #
 # CLAUDE.md and settings.json are symlinked file-to-file.
-# agents/ commands/ rules/ skills/ are symlinked DIRECTORY-to-directory, so any
+# agents/ commands/ hooks/ rules/ skills/ are symlinked DIRECTORY-to-directory, so any
 # new agent/command/rule/skill pulled into the repo appears automatically with no
 # re-install, and new files created under ~/.claude/<dir>/ flow back into the repo.
 
@@ -58,7 +58,7 @@ link_file "${REPO_DIR}/claude/CLAUDE.md"     ~/.claude/CLAUDE.md
 link_file "${REPO_DIR}/claude/settings.json" ~/.claude/settings.json
 
 # Whole directories (auto-reflect new content on pull)
-for dir in agents commands rules skills; do
+for dir in agents commands hooks rules skills; do
     link_dir "${REPO_DIR}/claude/${dir}" ~/.claude/"${dir}"
 done
 
@@ -66,4 +66,4 @@ echo ""
 echo "Done. Verify with:"
 echo "  ls -la ~/.claude/CLAUDE.md"
 echo "  ls -la ~/.claude/settings.json"
-echo "  ls -la ~/.claude/agents ~/.claude/commands ~/.claude/rules ~/.claude/skills"
+echo "  ls -la ~/.claude/agents ~/.claude/commands ~/.claude/hooks ~/.claude/rules ~/.claude/skills"

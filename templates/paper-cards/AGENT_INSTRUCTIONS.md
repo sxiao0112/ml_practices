@@ -37,7 +37,7 @@ curl -s "https://api.semanticscholar.org/graph/v1/paper/ArXiv:{ARXIV_ID}?fields=
 ```
 If Semantic Scholar returns a 429 (rate limit), fall back to OpenAlex:
 ```bash
-curl -s "https://api.openalex.org/works?search={PAPER_TITLE}&per_page=1&select=id,referenced_works"
+curl -s ${OPENALEX_API_KEY:+-H "Authorization: Bearer $OPENALEX_API_KEY"} "https://api.openalex.org/works?search={PAPER_TITLE}&per_page=1&select=id,referenced_works"
 ```
 Save the reference list — you'll use it for the `references.key_citations` field.
 

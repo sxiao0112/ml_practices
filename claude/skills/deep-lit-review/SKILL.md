@@ -17,6 +17,8 @@ Parse `$ARGUMENTS` for:
 - `— model: [sonnet|haiku|opus]`: Model for search agents and the in-page AI chat box (default: haiku)
 - `— webpage`: If present, generate an interactive HTML viewer after synthesis (see Webpage Generation)
 
+The review is always exported to the shared Obsidian vault at the end (see Obsidian Export) — no flag needed.
+
 ## File Structure
 
 The skill creates two separate areas — agent-facing working files and human-facing reports:
@@ -43,6 +45,19 @@ The skill creates two separate areas — agent-facing working files and human-fa
 ├── README.md                           # Overview for the human
 ├── index.html                          # Interactive viewer (only if --webpage)
 └── server.py                           # Local server + AI chat proxy (only if --webpage)
+```
+
+The Obsidian export goes to a shared vault outside `{output_dir}` (synced to the user's computer):
+
+```
+~/lit-review-vault/                     # One Obsidian vault for all reviews ($LIT_REVIEW_VAULT)
+├── Index.md                            # Table of all reviews
+└── {output_dir name}/
+    ├── Home.md                         # Map of content + paper index
+    ├── Papers/                         # One note per unique paper (frontmatter + backlinks)
+    ├── Streams/                        # One note per agent/follow-up file
+    ├── Reports/                        # Synthesis, open questions, per-stream reports
+    └── Log/                            # state.md, orchestrator_log.md
 ```
 
 ## Orchestration Loop
@@ -83,8 +98,13 @@ WHILE round < max_rounds AND NOT converged:
     round += 1
 
 AFTER loop exits:
-    Launch SYNTHESIS AGENT (reads all workbench files, writes reports/)
-    Update README.md with final status
+    Launch SYNTHESIS AGENT:
+        1. READ templates/synthesis_prompt.md (MANDATORY — do not write the prompt from scratch)
+        2. Fill in {{TOPIC}}, {{OUTPUT_DIR}}
+        3. The agent writes reports/synthesis.md and reports/open_questions.md
+    Update README.md with final status (follow templates/writing_style.md)
+
+    RUN OBSIDIAN EXPORT (see Obsidian Export) and tell the user the vault path
 
     IF --webpage was passed:
         Launch WEBPAGE AGENT (see templates/webpage_agent.md)
@@ -92,6 +112,15 @@ AFTER loop exits:
         and writes index.html + server.py to {output_dir}/
         Print to user: "Run: python {output_dir}/server.py  →  open http://localhost:8765"
 ```
+
+## Writing Style
+
+All human-facing output — `reports/`, `README.md` and your final message to the user — follows
+`templates/writing_style.md`: ASD-STE100 Simplified Technical English rules (active voice, simple tenses,
+max 25 words per sentence, max 6 sentences per paragraph, one term per concept) and tables/bullets
+instead of long prose. Search agents and the synthesis agent get this rule through their templates.
+Your final message to the user: a short summary table of streams + answers + confidence, the top
+findings as bullets, and the paths to the reports and the Obsidian vault.
 
 ## Convergence Criteria
 
@@ -117,21 +146,21 @@ AFTER loop exits:
 
 ## Citation Graph Traversal
 
-Agents use OpenAlex API for programmatic citation traversal. Rate limit: 10,000 requests/window (~20 hours), $0.001/request.
+Agents use OpenAlex API for programmatic citation traversal. Most calls cost $0.001. Budget is $0.10/day shared per IP without a key, $1/day with a free key (https://openalex.org/settings/api). The curl patterns send `$OPENALEX_API_KEY` as a bearer token when it is set and fall back to keyless calls otherwise. Before launching agents, check it with `[ -n "$OPENALEX_API_KEY" ] && echo set || echo unset`; if unset, tell the user once that a long review may exhaust the shared keyless budget (429 errors).
 
 **API patterns (baked into agent prompts):**
 ```bash
 # Search papers by topic
-curl -s "https://api.openalex.org/works?search=QUERY&per_page=10&select=id,title,publication_year,cited_by_count,doi"
+curl -s ${OPENALEX_API_KEY:+-H "Authorization: Bearer $OPENALEX_API_KEY"} "https://api.openalex.org/works?search=QUERY&per_page=10&select=id,title,publication_year,cited_by_count,doi"
 
 # Get a paper's references (backward traversal)
-curl -s "https://api.openalex.org/works/OPENALEX_ID?select=title,referenced_works"
+curl -s ${OPENALEX_API_KEY:+-H "Authorization: Bearer $OPENALEX_API_KEY"} "https://api.openalex.org/works/OPENALEX_ID?select=title,referenced_works"
 
 # Get papers citing a paper (forward traversal)
-curl -s "https://api.openalex.org/works?filter=cites:OPENALEX_ID&per_page=10&sort=cited_by_count:desc&select=id,title,publication_year,cited_by_count"
+curl -s ${OPENALEX_API_KEY:+-H "Authorization: Bearer $OPENALEX_API_KEY"} "https://api.openalex.org/works?filter=cites:OPENALEX_ID&per_page=10&sort=cited_by_count:desc&select=id,title,publication_year,cited_by_count"
 
 # Batch resolve OpenAlex IDs to metadata
-curl -s "https://api.openalex.org/works?filter=openalex:ID1|ID2|ID3&select=id,title,publication_year,cited_by_count,doi"
+curl -s ${OPENALEX_API_KEY:+-H "Authorization: Bearer $OPENALEX_API_KEY"} "https://api.openalex.org/works?filter=openalex:ID1|ID2|ID3&select=id,title,publication_year,cited_by_count,doi"
 ```
 
 **Traversal strategy:**
@@ -168,3 +197,26 @@ Level 3: Fetch actual paper
 ```
 
 The synthesis agent gets its own fresh context and can read all Level 2 files.
+
+## Obsidian Export
+
+After synthesis (and any time mid-review, if the user wants to browse progress), run:
+
+```bash
+python3 ~/.claude/skills/deep-lit-review/scripts/obsidian_export.py {output_dir}
+```
+
+It writes `~/lit-review-vault/{output_dir name}/` and refreshes `~/lit-review-vault/Index.md`. The
+user syncs `~/lit-review-vault` to their own computer with Syncthing and opens it in Obsidian as one
+vault. Use `--vault-dir DIR` only if the user asks for a standalone vault somewhere else.
+- `Papers/` — one note per unique paper (deduplicated by OpenAlex ID, then title) with YAML frontmatter
+  (`authors`, `year`, `venue`, `openalex`, `doi`, `cited_by`, `streams`, `tags: [paper]`), OpenAlex/DOI/Scholar
+  links, and every stream finding about it under "Mentioned in"
+- `Streams/`, `Reports/`, `Log/` — the review's markdown, with paper titles turned into `[[wikilinks]]`
+- `Home.md` — topic, streams, reports and a citation-sorted paper table; graph view is color-coded by folder
+
+Re-running is safe: generated notes are overwritten, but anything under a `## My notes` heading is kept.
+Papers are parsed from the bold-title citation lines in workbench files, so agents MUST keep the
+`**Title** (Authors, Year, Venue)` format from `templates/agent_prompt.md`. Report the paper count the
+script prints; if it is far below the agents' reported totals, check the workbench files for format drift.
+

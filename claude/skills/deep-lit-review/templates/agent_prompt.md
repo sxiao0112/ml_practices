@@ -80,21 +80,34 @@ Use this format:
 {{QUESTION}}
 
 ## Answer
-[3-5 sentence summary with confidence level. Be direct — "Yes/No/Partially, because X."]
+**[Yes / No / Partially]** — [1–2 sentences, max 25 words each] — Confidence: **[High/Medium/Low]** ([reason])
 
 ## Key Papers
-| Paper | Year | Venue | Finding |
-|-------|------|-------|---------|
-| ... | ... | ... | ... |
+| Paper | Year | Venue | Finding (max 15 words) | Confidence |
+|-------|------|-------|------------------------|------------|
+| **[exact title]** | ... | ... | ... | ... |
 
 ## Landscape
-[What the literature looks like — trends, convergence, debates. 1-2 paragraphs.]
+- **[Trend or approach]**: [1 sentence]
+- **[Debate]**: [1 sentence — who says what]
+[3–6 bullets. No paragraphs longer than 3 sentences.]
 
-## Gap
-[What has NOT been done that's relevant to the research direction. Be specific.]
+## Gaps
+| Gap | Why it matters | Closest existing work |
+|-----|----------------|-----------------------|
 ```
 
+**Writing style for File 2 (MANDATORY):** Read `~/.claude/skills/deep-lit-review/templates/writing_style.md`
+and follow it: ASD-STE100 rules (active voice, simple tenses, max 25 words per sentence, max 6
+sentences per paragraph, one term per concept) and tables/bullets instead of long prose.
+
 Write File 2 AFTER completing all search rounds. Distill, don't copy from File 1.
+
+**Paper entry format (required).** Every paper in File 1 MUST be a bullet starting with the bolded title
+followed by `(Authors, Year, Venue)` — e.g. `- **Attention Is All You Need** (Vaswani et al., 2017, NeurIPS) — finding`.
+Include a 4-digit year (use the first year if unsure, never omit it). Put `OpenAlex ID: W…` and `Cited by: N`
+on indented sub-bullets when known. Do not bold other text followed by parentheses. These lines are parsed
+into one Obsidian note per paper, so entries that break the format are dropped.
 
 ---
 
@@ -112,16 +125,16 @@ For the top 3 papers from Round 1, use OpenAlex API to traverse the citation gra
 
 ```bash
 # Step 1: Find the paper in OpenAlex
-curl -s "https://api.openalex.org/works?search=PAPER+TITLE+HERE&per_page=3&select=id,title,publication_year,cited_by_count,doi"
+curl -s ${OPENALEX_API_KEY:+-H "Authorization: Bearer $OPENALEX_API_KEY"} "https://api.openalex.org/works?search=PAPER+TITLE+HERE&per_page=3&select=id,title,publication_year,cited_by_count,doi"
 
 # Step 2: Get its references (what it cites — finds foundational work)
-curl -s "https://api.openalex.org/works/OPENALEX_ID?select=title,referenced_works"
+curl -s ${OPENALEX_API_KEY:+-H "Authorization: Bearer $OPENALEX_API_KEY"} "https://api.openalex.org/works/OPENALEX_ID?select=title,referenced_works"
 
 # Step 3: Batch resolve reference IDs to see what they are
-curl -s "https://api.openalex.org/works?filter=openalex:ID1|ID2|ID3|ID4|ID5&select=id,title,publication_year,cited_by_count"
+curl -s ${OPENALEX_API_KEY:+-H "Authorization: Bearer $OPENALEX_API_KEY"} "https://api.openalex.org/works?filter=openalex:ID1|ID2|ID3|ID4|ID5&select=id,title,publication_year,cited_by_count"
 
 # Step 4: Get papers that cite it (finds recent follow-ups)
-curl -s "https://api.openalex.org/works?filter=cites:OPENALEX_ID&per_page=10&sort=cited_by_count:desc&select=id,title,publication_year,cited_by_count"
+curl -s ${OPENALEX_API_KEY:+-H "Authorization: Bearer $OPENALEX_API_KEY"} "https://api.openalex.org/works?filter=cites:OPENALEX_ID&per_page=10&sort=cited_by_count:desc&select=id,title,publication_year,cited_by_count"
 ```
 
 For each promising paper found via citation traversal:
@@ -158,6 +171,7 @@ Stop searching when:
 Track "unique relevant papers found this round" explicitly in your search log.
 
 ## Important Rules
+- Run OpenAlex curl commands exactly as written above: the `${OPENALEX_API_KEY:+...}` part sends the user's API key when one is set. Never print or echo the key.
 - Be honest about confidence. "I found nothing" is a valid and valuable answer.
 - Distinguish peer-reviewed (venue name) from preprints (arXiv, OpenReview)
 - Note if a paper directly competes with or contradicts our direction

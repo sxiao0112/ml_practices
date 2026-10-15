@@ -9,6 +9,14 @@
             "command": "cd ~/ml-best-practices && git pull origin main --quiet 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -s ~/.config/openalex/api_key ] && [ -n \"$CLAUDE_ENV_FILE\" ]; then echo 'export OPENALEX_API_KEY=\"$(cat ~/.config/openalex/api_key)\"' >> \"$CLAUDE_ENV_FILE\"; fi"
+          }
+        ]
       }
     ],
     "Notification": [

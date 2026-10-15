@@ -33,6 +33,7 @@ Lessons learned (Validation Dilemma paper, 2026-04):
 """
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -124,6 +125,8 @@ def api_get(url: str) -> dict | str | None:
     """HTTP GET with retry on 429."""
     req = urllib.request.Request(url)
     req.add_header("User-Agent", "BibVerify/2.0 (mailto:verify@example.com)")
+    if "api.openalex.org" in url and os.environ.get("OPENALEX_API_KEY"):
+        req.add_header("Authorization", f"Bearer {os.environ['OPENALEX_API_KEY']}")
     for attempt in range(2):
         try:
             with urllib.request.urlopen(req, timeout=15) as resp:

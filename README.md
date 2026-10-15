@@ -51,6 +51,20 @@ bash ~/ml-best-practices/install.sh
 This symlinks all Claude Code config files so every session inherits shared rules,
 commands, hooks, and settings.
 
+### OpenAlex API key (recommended for lit reviews)
+
+The lit-review and citation skills call the OpenAlex API. Without a key, every machine on your IP
+shares a $0.10/day budget; a free key gives you $1/day. Create an account at https://openalex.org,
+copy the key from https://openalex.org/settings/api, and save it to a private file:
+
+```bash
+mkdir -p ~/.config/openalex && printf %s "your-key" > ~/.config/openalex/api_key && chmod 600 ~/.config/openalex/api_key
+```
+
+A SessionStart hook in `settings.json` exports it as `OPENALEX_API_KEY` in every new Claude Code
+session. (A plain `export` in `~/.bashrc` is not enough: Claude Code sessions launched by the
+desktop app inherit their environment from a long-running server process, not from your shell.)
+
 ### Notifications (optional)
 
 Hooks send push notifications via [ntfy.sh](https://ntfy.sh) when Claude Code
