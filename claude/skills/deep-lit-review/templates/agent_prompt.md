@@ -21,7 +21,8 @@ Use this format:
 # {{QUESTION}}
 
 ## TL;DR
-[2-3 sentence direct answer to the question. Be specific — "yes/no/partially, because X"]
+Verdict: [Yes / Mostly yes / Mixed / Mostly no / No / No evidence] — Strength: [High/Medium/Low]
+[2-3 sentences. Say under which conditions the answer holds and where it does not.]
 
 ## What Exists
 ### Sub-theme 1: [name]
@@ -70,38 +71,71 @@ Use this format:
 ```
 
 ### File 2: Distilled per-stream report
-Save a clean, human-facing summary to: {{REPORT_PATH}}
+Save a clean, human-facing report to: {{REPORT_PATH}}
 
-Use this format:
+**Writing style (MANDATORY):** Before you write File 2, read
+`~/.claude/skills/deep-lit-review/templates/writing_style.md` and follow every rule in it. The reader knows basic ML
+but nothing about this subfield. Before you save, run the self-check and the `style_check.py` command at the end of
+that file, and fix every flagged line.
+
+Write File 2 AFTER completing all search rounds. Distill, don't copy from File 1. The context above is for you, not
+for the reader: explain any part of it that the report needs.
+
+Use this format. Keep the section order. Write "None found." in a section that has no content.
 ```markdown
-# {{STREAM_ID}}: {{STREAM_TITLE}}
+# {{STREAM_TITLE}}
 
-## Question
-{{QUESTION}}
+**Question:** [the question in plain words, max 25 words]
 
-## Answer
-**[Yes / No / Partially]** — [1–2 sentences, max 25 words each] — Confidence: **[High/Medium/Low]** ([reason])
+## Short answer
+**Verdict:** [Yes / Mostly yes / Mixed / Mostly no / No / No evidence] — **Strength:** [High/Medium/Low] ([reason])
+- **Holds when:** [condition → result]
+- **Does not hold when:** [condition → result]
+- **Still unknown:** [what nobody has tested]
+[2–4 bullets in total. Use the labels that fit the evidence.]
 
-## Key Papers
-| Paper | Year | Venue | Finding (max 15 words) | Confidence |
-|-------|------|-------|------------------------|------------|
-| **[exact title]** | ... | ... | ... | ... |
+## Background
+[2–4 sentences: what problem this question is about, and why it matters. No paper names yet.]
 
-## Landscape
-- **[Trend or approach]**: [1 sentence]
-- **[Debate]**: [1 sentence — who says what]
-[3–6 bullets. No paragraphs longer than 3 sentences.]
+Key terms used on this page:
+| Term | Plain meaning (max 20 words) |
+|------|------------------------------|
+[Every acronym, method, benchmark, metric and subfield word used below.]
+
+## Main approaches
+The main ways researchers attack this question:
+| Approach | Core idea in plain words | Main papers (short names) | Status |
+|----------|--------------------------|---------------------------|--------|
+[Status: Established (replicated, several groups) / Emerging (few papers, recent) / Contested (results disagree)]
+
+## What the evidence shows
+### Finding 1: [one plain-language claim, max 20 words]
+- **[Short name] ([First author] [Year])**: [what they did] → [what they found, with scale and direction]
+- **[Short name] ([First author] [Year])**: [...]
+- **Strength:** [High/Medium/Low] — [reason: models, seeds, replications, peer review]
+
+### Finding 2: [...]
+[2–5 findings, most important first. Group papers under the claim they support. Do not list papers one by one.]
+
+## Where researchers disagree
+| Question | View A (short names) | View B (short names) | What would settle it |
+|----------|----------------------|----------------------|----------------------|
 
 ## Gaps
-| Gap | Why it matters | Closest existing work |
-|-----|----------------|-----------------------|
+| Gap | Why it matters | Closest existing work (short name) |
+|-----|----------------|------------------------------------|
+
+## Papers cited
+| Short name | Full title | Year | Venue | How we read it |
+|------------|------------|------|-------|----------------|
+| [Short name] | **[exact title, as in File 1]** | ... | [venue or "arXiv preprint"] | [full text / abstract / summary] |
+
+<details><summary>Original research question</summary>
+
+{{QUESTION}}
+
+</details>
 ```
-
-**Writing style for File 2 (MANDATORY):** Read `~/.claude/skills/deep-lit-review/templates/writing_style.md`
-and follow it: ASD-STE100 rules (active voice, simple tenses, max 25 words per sentence, max 6
-sentences per paragraph, one term per concept) and tables/bullets instead of long prose.
-
-Write File 2 AFTER completing all search rounds. Distill, don't copy from File 1.
 
 **Paper entry format (required).** Every paper in File 1 MUST be a bullet starting with the bolded title
 followed by `(Authors, Year, Venue)` — e.g. `- **Attention Is All You Need** (Vaswani et al., 2017, NeurIPS) — finding`.

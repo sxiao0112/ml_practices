@@ -35,8 +35,8 @@ The skill creates two separate areas — agent-facing working files and human-fa
 │   └── orchestrator_log.md             # All decisions: what launched, why, what came back
 │
 ├── reports/                            # Human-facing (clean, distilled)
-│   ├── per_stream/                     # One page per research stream
-│   │   ├── {stream_name}.md
+│   ├── per_stream/                     # One page per stream and per follow-up
+│   │   ├── {id}_{short_name}.md
 │   │   └── ...
 │   ├── synthesis.md                    # Cross-stream synthesis + direction recommendations
 │   └── open_questions.md               # What we still don't know
@@ -70,13 +70,19 @@ WHILE round < max_rounds AND NOT converged:
     IF round == 0:
         For each agent, build its prompt by:
             1. READ templates/agent_prompt.md (MANDATORY — do not write prompts from scratch)
-            2. Fill in {{QUESTION}}, {{CONTEXT}}, {{OUTPUT_PATH}}, {{REPORT_PATH}}
+            2. Fill in {{QUESTION}}, {{CONTEXT}}, {{OUTPUT_PATH}}, {{REPORT_PATH}},
+               {{STREAM_TITLE}} (a plain-language title, no ID)
             3. Pass the filled template as the agent's prompt
         Launch initial batch of agents (parallel, haiku)
     ELSE:
         Launch follow-up agents using the same template-filling process
+        (OUTPUT_PATH = workbench/follow_ups/f{round}_{id}_{topic}.md,
+         REPORT_PATH = reports/per_stream/f{round}_{id}_{topic}.md)
 
     WAIT for agents to complete
+
+    RUN STYLE CHECK on the new reports/per_stream/ files (see Writing Style).
+    If it flags lines, send the agent back to fix them before you review the stream.
 
     REVIEW each agent result:
         Read TL;DR section only (Level 1 review)
@@ -100,8 +106,11 @@ WHILE round < max_rounds AND NOT converged:
 AFTER loop exits:
     Launch SYNTHESIS AGENT:
         1. READ templates/synthesis_prompt.md (MANDATORY — do not write the prompt from scratch)
-        2. Fill in {{TOPIC}}, {{OUTPUT_DIR}}
+        2. Fill in {{TOPIC}}, {{OUTPUT_DIR}}, {{PROJECT_CONTEXT}} (the user's project and planned
+           method, if any, else "None"), {{EXTRA_SECTIONS}} (headings + table specs for any
+           project-specific sections the user asked for, else empty)
         3. The agent writes reports/synthesis.md and reports/open_questions.md
+    RUN STYLE CHECK on reports/synthesis.md and reports/open_questions.md; fix flagged lines
     Update README.md with final status (follow templates/writing_style.md)
 
     RUN OBSIDIAN EXPORT (see Obsidian Export) and tell the user the vault path
@@ -116,10 +125,22 @@ AFTER loop exits:
 ## Writing Style
 
 All human-facing output — `reports/`, `README.md` and your final message to the user — follows
-`templates/writing_style.md`: ASD-STE100 Simplified Technical English rules (active voice, simple tenses,
-max 25 words per sentence, max 6 sentences per paragraph, one term per concept) and tables/bullets
-instead of long prose. Search agents and the synthesis agent get this rule through their templates.
-Your final message to the user: a short summary table of streams + answers + confidence, the top
+`templates/writing_style.md`. It is the only copy of the style rules: do not restate them in prompts.
+Its main rule: write for a reader who knows basic ML but nothing about this subfield, so define every
+term and explain every number. It also sets the ASD-STE100 rules, the word limits, and the six-value
+verdict scale. Search agents and the synthesis agent read it through their templates.
+
+Check every report mechanically after an agent writes it:
+
+```bash
+python3 ~/.claude/skills/deep-lit-review/scripts/style_check.py {output_dir}/reports
+```
+
+It flags long sentences, semicolons, long table cells, wide tables, internal IDs, full titles used as
+sentence subjects, and acronyms missing from the page's Key terms. Exit code 1 means flagged lines. A clean
+result does not prove the page is readable, so still skim one report per round.
+
+Your final message to the user: a short summary table of streams + verdicts + strength, the top
 findings as bullets, and the paths to the reports and the Obsidian vault.
 
 ## Convergence Criteria
