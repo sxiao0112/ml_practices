@@ -1,0 +1,23 @@
+{
+ "context": "Overall review topic: the impact of large language models (chatbots, AI answer engines, AI shopping assistants) on CONSUMER SEARCH, and how to better design or use LLMs for consumer search; spanning economics, marketing and CS. This is FOLLOW-UP ROUND 2. Eleven agents already ran (about 210 papers). BEFORE searching, skim the TL;DR and paper titles of every existing workbench file so you report only NEW papers.\n\nExisting workbench files: /home/ubuntu/ml-best-practices/docs/lit_review/2026-11-03-llm-consumer-search/workbench/agents/*.md and /home/ubuntu/ml-best-practices/docs/lit_review/2026-11-03-llm-consumer-search/workbench/follow_ups/*.md\n\nToday is 2026-11-03. Include 2025-2026 working papers (SSRN, NBER, arXiv) and peer-reviewed work.",
+ "streams": [
+  {
+   "id": "1",
+   "short": "econ_marketing_citation_traversal",
+   "subdir": "follow_ups",
+   "title": "Economics and marketing: citation trail and stress test",
+   "question": "Starting from the key economics and marketing papers already found (e.g., Egan et al. 2026; Fradkin 2025; Kaiser and Schulze 2026 Marketing Science; Werner et al. 2024 steering; Qiu et al. 2025 Marketing Science; Fish et al. 2024 LLM collusion; the 2026 Weitzman-style AI-searcher theory papers; Padilla et al. 2026), run forward and backward citation traversal in OpenAlex and Google Scholar-style web search to find remaining econ, marketing and IS papers on LLMs and consumer search, competition, prices, product variety, or welfare. Then run an adversarial check: are there papers that find NO effect, or the opposite effect, of AI assistants on search, concentration or welfare?",
+   "extra": "Read first: workbench/agents/01_econ_search_theory.md, workbench/follow_ups/f1_1_field_evidence_substitution.md and f1_2_econ_marketing_working_papers.md. Output file names use prefix f2_1.",
+   "round": 2
+  },
+  {
+   "id": "2",
+   "short": "llm_simulated_consumers",
+   "subdir": "follow_ups",
+   "title": "Using LLMs to model and study consumer search",
+   "question": "How are LLMs used as research tools to model or simulate consumer search and choice: LLM-simulated consumers ('silicon samples') for market research and willingness-to-pay estimation, LLM agents as synthetic shoppers to test search interfaces or ranking, and LLM-based structural or behavioral models of search? How well do simulated consumers match real consumer search and choice data, and where do they fail?",
+   "extra": "This sub-field was not covered by any earlier stream. Agent-as-delegated-shopper work (stream 05) is covered; focus here on LLMs as a model of humans for research and design testing. Output file names use prefix f2_2.",
+   "round": 2
+  }
+ ]
+}
